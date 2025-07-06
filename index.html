@@ -1,53 +1,135 @@
 <!DOCTYPE html>
-<html>
+<html lang="de">
 <head>
-  <title>Auftrag erfassen</title>
-  <meta charset="UTF-8">
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Auftragsmanager Pro</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; background: #f2f2f2; }
-    input, select, textarea { width: 100%; margin-bottom: 12px; padding: 8px; }
-    button { padding: 10px; background-color: #2a9d8f; color: white; border: none; width: 100%; }
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    form {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      max-width: 500px;
+      margin: auto;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    input, select, textarea, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+    button {
+      background-color: #1976d2;
+      color: white;
+      border: none;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+    button:hover {
+      background-color: #135ba1;
+    }
   </style>
 </head>
 <body>
-  <h2>📋 Auftrag erfassen</h2>
-  <input placeholder="Name" id="name" required />
-  <input placeholder="Straße" id="strasse" required />
-  <input placeholder="PLZ" id="plz" required />
-  <input placeholder="Ort" id="ort" required />
-  <select id="land">
-    <option value="AT">Österreich</option>
-    <option value="CH">Schweiz</option>
-  </select>
-  <input placeholder="Telefonnummer" id="telefon" required />
-  <select id="branche">
-    <option value="Schlüsseldienst">Schlüsseldienst</option>
-    <option value="Rohrreinigung">Rohrreinigung</option>
-    <option value="Sanitär">Sanitär</option>
-    <option value="Heizung">Heizung</option>
-    <option value="Elektro">Elektro</option>
-    <option value="Schädlingsbekämpfung">Schädlingsbekämpfung</option>
-    <option value="Spenglerei">Spenglerei</option>
-  </select>
-  <textarea placeholder="Zusatzinfo" id="info"></textarea>
-  <button onclick="senden()">✅ Auftrag senden</button>
+
+  <form id="auftragForm">
+    <h2>📋 Neuer Auftrag</h2>
+
+    <label for="name">Name</label>
+    <input type="text" id="name" required />
+
+    <label for="telefon">Telefon</label>
+    <input type="tel" id="telefon" required />
+
+    <label for="strasse">Straße</label>
+    <input type="text" id="strasse" required />
+
+    <label for="plz">PLZ</label>
+    <input type="text" id="plz" required />
+
+    <label for="ort">Ort</label>
+    <input type="text" id="ort" required />
+
+    <label for="land">Land</label>
+    <select id="land" required>
+      <option value="">Bitte wählen</option>
+      <option value="AT">Österreich</option>
+      <option value="CH">Schweiz</option>
+    </select>
+
+    <label for="branche">Branche</label>
+    <select id="branche" required>
+      <option value="">Bitte wählen</option>
+      <option value="Schlüsseldienst">Schlüsseldienst</option>
+      <option value="Rohrreinigung">Rohrreinigung</option>
+      <option value="Sanitär">Sanitär</option>
+      <option value="Heizung">Heizung</option>
+      <option value="Elektro">Elektro</option>
+      <option value="Spenglerei">Spenglerei</option>
+      <option value="Schädlingsbekämpfung">Schädlingsbekämpfung</option>
+    </select>
+
+    <label for="information">Zusatzinformation</label>
+    <textarea id="information" rows="3"></textarea>
+
+    <label for="termin">Termin (optional)</label>
+    <input type="datetime-local" id="termin" />
+
+    <button type="submit">✅ Auftrag senden</button>
+  </form>
 
   <script>
-    function senden() {
+    document.getElementById('auftragForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
       const data = {
         name: document.getElementById('name').value,
+        telefon: document.getElementById('telefon').value,
         strasse: document.getElementById('strasse').value,
         plz: document.getElementById('plz').value,
         ort: document.getElementById('ort').value,
         land: document.getElementById('land').value,
-        telefon: document.getElementById('telefon').value,
         branche: document.getElementById('branche').value,
-        info: document.getElementById('info').value,
+        information: document.getElementById('information').value,
+        termin: document.getElementById('termin').value
       };
-      Telegram.WebApp.sendData(JSON.stringify(data));
-      Telegram.WebApp.close();
-    }
+
+      // Optional: Adresse validieren via Google Maps API (nur wenn du API Key hast)
+      const adresse = `${data.strasse}, ${data.plz} ${data.ort}, ${data.land}`;
+      const isValid = adresse.length > 10; // einfache Pseudo-Validierung
+
+      if (!isValid) {
+        alert("Bitte überprüfe die Adresse.");
+        return;
+      }
+
+      try {
+        await fetch('https://DEIN-WEBHOOK-URL-von-n8n', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        alert("✅ Auftrag wurde gesendet!");
+        document.getElementById('auftragForm').reset();
+      } catch (err) {
+        alert("❌ Fehler beim Senden.");
+        console.error(err);
+      }
+    });
   </script>
+
 </body>
 </html>
