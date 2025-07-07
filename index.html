@@ -2,134 +2,54 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Auftragsmanager Pro</title>
+  <title>Auftrag erfassen</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      background: #f5f5f5;
+    body { font-family: sans-serif; padding: 20px; background: #f4f4f4; }
+    input, textarea, select, button {
+      width: 100%; margin-top: 10px; padding: 10px; font-size: 16px;
     }
-    form {
-      background: #fff;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      max-width: 500px;
-      margin: auto;
-    }
-    label {
-      display: block;
-      margin-top: 15px;
-      font-weight: bold;
-    }
-    input, select, textarea, button {
-      width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-      font-size: 16px;
-    }
-    button {
-      background-color: #1976d2;
-      color: white;
-      border: none;
-      cursor: pointer;
-      margin-top: 20px;
-    }
-    button:hover {
-      background-color: #135ba1;
-    }
+    button { background-color: #2a9df4; color: white; border: none; cursor: pointer; }
   </style>
 </head>
 <body>
+  <h2>📋 Auftrag erfassen</h2>
+  
+  <input type="text" id="kunde" placeholder="👤 Kundenname" required />
+  <input type="text" id="adresse" placeholder="🏠 Adresse" required />
+  <input type="tel" id="telefon" placeholder="📞 Telefonnummer" required />
+  <textarea id="beschreibung" placeholder="🛠️ Beschreibung des Auftrags" rows="4" required></textarea>
+  
+  <select id="prioritaet">
+    <option value="Normal">🟢 Normal</option>
+    <option value="Dringend">🔴 Dringend</option>
+    <option value="Termin">📅 Termin vereinbart</option>
+  </select>
 
-  <form id="auftragForm">
-    <h2>📋 Neuer Auftrag</h2>
-
-    <label for="name">Name</label>
-    <input type="text" id="name" required />
-
-    <label for="telefon">Telefon</label>
-    <input type="tel" id="telefon" required />
-
-    <label for="strasse">Straße</label>
-    <input type="text" id="strasse" required />
-
-    <label for="plz">PLZ</label>
-    <input type="text" id="plz" required />
-
-    <label for="ort">Ort</label>
-    <input type="text" id="ort" required />
-
-    <label for="land">Land</label>
-    <select id="land" required>
-      <option value="">Bitte wählen</option>
-      <option value="AT">Österreich</option>
-      <option value="CH">Schweiz</option>
-    </select>
-
-    <label for="branche">Branche</label>
-    <select id="branche" required>
-      <option value="">Bitte wählen</option>
-      <option value="Schlüsseldienst">Schlüsseldienst</option>
-      <option value="Rohrreinigung">Rohrreinigung</option>
-      <option value="Sanitär">Sanitär</option>
-      <option value="Heizung">Heizung</option>
-      <option value="Elektro">Elektro</option>
-      <option value="Spenglerei">Spenglerei</option>
-      <option value="Schädlingsbekämpfung">Schädlingsbekämpfung</option>
-    </select>
-
-    <label for="information">Zusatzinformation</label>
-    <textarea id="information" rows="3"></textarea>
-
-    <label for="termin">Termin (optional)</label>
-    <input type="datetime-local" id="termin" />
-
-    <button type="submit">✅ Auftrag senden</button>
-  </form>
+  <button onclick="senden()">✅ Auftrag senden</button>
 
   <script>
-    document.getElementById('auftragForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-
+    function senden() {
       const data = {
-        name: document.getElementById('name').value,
-        telefon: document.getElementById('telefon').value,
-        strasse: document.getElementById('strasse').value,
-        plz: document.getElementById('plz').value,
-        ort: document.getElementById('ort').value,
-        land: document.getElementById('land').value,
-        branche: document.getElementById('branche').value,
-        information: document.getElementById('information').value,
-        termin: document.getElementById('termin').value
+        kunde: document.getElementById("kunde").value.trim(),
+        adresse: document.getElementById("adresse").value.trim(),
+        telefon: document.getElementById("telefon").value.trim(),
+        beschreibung: document.getElementById("beschreibung").value.trim(),
+        prioritaet: document.getElementById("prioritaet").value,
+        timestamp: new Date().toISOString()
       };
 
-      // Optional: Adresse validieren via Google Maps API (nur wenn du API Key hast)
-      const adresse = `${data.strasse}, ${data.plz} ${data.ort}, ${data.land}`;
-      const isValid = adresse.length > 10; // einfache Pseudo-Validierung
-
-      if (!isValid) {
-        alert("Bitte überprüfe die Adresse.");
+      if (!data.kunde || !data.adresse || !data.telefon || !data.beschreibung) {
+        alert("Bitte alle Felder ausfüllen.");
         return;
       }
 
-      try {
-        await fetch('https://DEIN-WEBHOOK-URL-von-n8n', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
-        });
-        alert("✅ Auftrag wurde gesendet!");
-        document.getElementById('auftragForm').reset();
-      } catch (err) {
-        alert("❌ Fehler beim Senden.");
-        console.error(err);
-      }
-    });
-  </script>
+      Telegram.WebApp.sendData(JSON.stringify(data)); // Senden an Bot (z. B. n8n-Webhook)
+      Telegram.WebApp.close(); // App schließen
+    }
 
+    Telegram.WebApp.ready();
+  </script>
 </body>
 </html>
