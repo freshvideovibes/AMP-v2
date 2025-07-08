@@ -1,55 +1,97 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <title>Auftrag erfassen</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <meta charset="UTF-8">
+  <title>AuftragsManager Pro</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { font-family: sans-serif; padding: 20px; background: #f4f4f4; }
-    input, textarea, select, button {
-      width: 100%; margin-top: 10px; padding: 10px; font-size: 16px;
+    body {
+      background-color: #121212;
+      color: #f1f1f1;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 20px;
     }
-    button { background-color: #2a9df4; color: white; border: none; cursor: pointer; }
+
+    h1 {
+      color: #00ffd5;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .auftrag-box {
+      background-color: #1e1e1e;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px #00ffd5;
+      margin-bottom: 30px;
+    }
+
+    .auftrag-box p {
+      margin: 8px 0;
+      line-height: 1.5;
+    }
+
+    .button-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    button {
+      background-color: #00ffd5;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      color: #121212;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    button:hover {
+      background-color: #00c9aa;
+    }
   </style>
 </head>
 <body>
-  <h2>📋 Auftrag erfassen</h2>
-  
-  <input type="text" id="kunde" placeholder="👤 Kundenname" required />
-  <input type="text" id="adresse" placeholder="🏠 Adresse" required />
-  <input type="tel" id="telefon" placeholder="📞 Telefonnummer" required />
-  <textarea id="beschreibung" placeholder="🛠️ Beschreibung des Auftrags" rows="4" required></textarea>
-  
-  <select id="prioritaet">
-    <option value="Normal">🟢 Normal</option>
-    <option value="Dringend">🔴 Dringend</option>
-    <option value="Termin">📅 Termin vereinbart</option>
-  </select>
 
-  <button onclick="senden()">✅ Auftrag senden</button>
+  <h1>📥 Neuer Auftrag</h1>
+
+  <div class="auftrag-box">
+    <p><strong>👤 Name:</strong> Maier</p>
+    <p><strong>📍 PLZ / Ort:</strong> 4600 Wels</p>
+    <p><strong>🔧 Branche:</strong> Schädlingsbekämpfung</p>
+    <p><strong>📞 Telefon:</strong> 0043664859765</p>
+    <p><strong>📅 Termin:</strong> 28.07. um 10:00 Uhr</p>
+    <p><strong>🔢 Auftragsnummer:</strong> 895582po-9a661-407b-9fce-1964022252po_</p>
+  </div>
+
+  <div class="button-container">
+    <button onclick="sendData('annehmen')">✅ Annehmen</button>
+    <button onclick="sendData('ablehnen')">❌ Ablehnen</button>
+    <button onclick="sendData('korrigieren')">🛠️ Korrigieren</button>
+    <button onclick="sendData('terminieren')">📆 Terminieren</button>
+  </div>
 
   <script>
-    function senden() {
-      const data = {
-        kunde: document.getElementById("kunde").value.trim(),
-        adresse: document.getElementById("adresse").value.trim(),
-        telefon: document.getElementById("telefon").value.trim(),
-        beschreibung: document.getElementById("beschreibung").value.trim(),
-        prioritaet: document.getElementById("prioritaet").value,
-        timestamp: new Date().toISOString()
+    function sendData(action) {
+      const auftragsnummer = "895582po-9a661-407b-9fce-1964022252po_";
+      const payload = {
+        action,
+        auftragsnummer
       };
 
-      if (!data.kunde || !data.adresse || !data.telefon || !data.beschreibung) {
-        alert("Bitte alle Felder ausfüllen.");
-        return;
+      if (window.Telegram.WebApp) {
+        Telegram.WebApp.sendData(JSON.stringify(payload));
+        Telegram.WebApp.close();
+      } else {
+        alert("Telegram WebApp nicht erkannt.");
       }
-
-      Telegram.WebApp.sendData(JSON.stringify(data)); // Senden an Bot (z. B. n8n-Webhook)
-      Telegram.WebApp.close(); // App schließen
     }
-
-    Telegram.WebApp.ready();
   </script>
+
 </body>
 </html>
